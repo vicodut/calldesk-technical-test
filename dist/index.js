@@ -45,7 +45,7 @@ function buildResponse(output, amount, currencies) {
   return `${amount} ${currencies.curr1} is ${(amount * output).toFixed(2)} ${currencies.curr2}`;
 }
 
-exports.helloWorld = functions.https.onRequest((req, res) => {
+const helloWorld = functions.https.onRequest(async (req, res) => {
   let amount = 1;
   let curr1 = '';
   let curr2 = '';
@@ -72,5 +72,6 @@ exports.helloWorld = functions.https.onRequest((req, res) => {
 
 module.exports = {
   getCurrency,
-  buildResponse
+  buildResponse,
+  helloWorld
 };

@@ -1,13 +1,22 @@
 var assert = require('assert');
 var expect = require('chai').expect;
-
 const Index = require('../dist/index.js');
+const admin = require('firebase-admin');
+
+const test = require('firebase-functions-test')();
+
 describe('Array', function() {
   describe('#indexOf()', function() {
     it('Test http function', () => {
-      Index.helloWorld.then((res) => {
-          expect(res.status.code).toBe(200);
-      });
+      const req = { query: {text: 'input'} };
+      const res = {
+        redirect: (code, url) => {
+          assert.equal(code, 303);
+          assert.equal(url, 'new_ref');
+          done();
+        }
+      };
+      Index.helloWorld(req, res);
     });
 
     it('Test convert currency', () => {
