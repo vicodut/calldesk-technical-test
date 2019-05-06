@@ -72,3 +72,8 @@ exports.helloWorld = functions.https.onRequest((req, res) => {
     res.send(JSON.stringify({ speech: error, displayText: error }));
   });
 });
+
+module.exports = {
+  getCurrency,
+  buildResponse,
+};

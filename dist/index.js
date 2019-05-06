@@ -13,7 +13,6 @@ const key = '5a72d29dab3ab35a04c6';
  */
 function getCurrency(currencyPair) {
   const url = `${host}?q=${currencyPair}&apiKey=${key}`;
-  console.log(url);
   return new Promise((resolve, reject) => {
     http.get(url, res => {
       let body = '';
@@ -70,3 +69,8 @@ exports.helloWorld = functions.https.onRequest((req, res) => {
     res.send(JSON.stringify({ speech: error, displayText: error }));
   });
 });
+
+module.exports = {
+  getCurrency,
+  buildResponse
+};
