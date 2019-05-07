@@ -48,13 +48,13 @@ function buildResponse(output: number, amount: number, currencies: any) {
   return `${amount} ${currencies.curr1} is ${(amount * output).toFixed(2)} ${currencies.curr2}`;
 }
 
-const helloWorld = functions.https.onRequest(async (req, res) => {
+const helloWorld = functions.https.onRequest((req, res) => {
   let amount: number = 1;
   let curr1: string = '';
   let curr2: string = '';
   let currencyPair: string = '';
 
-  if (req.body.queryResult.parameters.currency.amount) {
+  if (req.body.queryResult.parameters.currency) {
     ({ curr2 } = req.body.queryResult.parameters);
     ({ amount } = req.body.queryResult.parameters.currency);
     curr1 = req.body.queryResult.parameters.currency.currency;
