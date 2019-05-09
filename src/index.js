@@ -3,8 +3,38 @@
 const http = require('http');
 const functions = require('firebase-functions');
 
-const host = 'http://free.currconv.com/api/v7/convert';
+const host = 'http://free.currconv.com/api/v7';
 const key = '5a72d29dab3ab35a04c6';
+
+
+/**
+ * getCountryDatas - description
+ *
+ * @param  {type} country: string description
+ * @return {type}                 description
+ */
+function getCountryDatas(country: string) {
+  const url = `${host}/countries?apiKey=${key}`;
+  return new Promise((resolve, reject) => {
+    http.get(url, (res) => {
+      let body = '';
+
+      res.on('data', (d) => {
+        body += d;
+      });
+
+      res.on('end', () => {
+        const response = Object.values(JSON.parse(body).results);
+        resolve(response.find(el => el.name === country)
+          ? response.find(el => el.name === country) : -1);
+      });
+
+      res.on('error', (error) => {
+        reject(error);
+      });
+    });
+  });
+}
 
 /**
  * getCurrency - description
@@ -13,8 +43,8 @@ const key = '5a72d29dab3ab35a04c6';
  * @param  {type} amount       description
  * @return {type}              description
  */
-function getCurrency(currencyPair) {
-  const url = `${host}?q=${currencyPair}&apiKey=${key}`;
+function getCurrency(currencyPair: string) {
+  const url = `${host}/convert?q=${currencyPair}&apiKey=${key}`;
   return new Promise((resolve, reject) => {
     http.get(url, (res) => {
       let body = '';
@@ -25,7 +55,11 @@ function getCurrency(currencyPair) {
 
       res.on('end', () => {
         const response = JSON.parse(body);
-        resolve(response.results[currencyPair].val);
+        if (response.results[currencyPair]) {
+          resolve(response.results[currencyPair].val);
+        } else {
+          resolve(-1);
+        }
       });
 
       res.on('error', (error) => {
@@ -44,37 +78,71 @@ function getCurrency(currencyPair) {
  * @param  {type} currencies: any description
  * @return {type}                 description
  */
-function buildResponse(output: number, amount: number, currencies: any) {
+function buildResponseCurrencies(output: number, amount: number, currencies: any) {
   return `${amount} ${currencies.curr1} is ${(amount * output).toFixed(2)} ${currencies.curr2}`;
 }
 
-const helloWorld = functions.https.onRequest((req, res) => {
+
+/**
+ * buildResponseCountry - description
+ *
+ * @param  {type} output: any description
+ * @return {type}             description
+ */
+function buildResponseCountry(output: any) {
+  return `${output.name} use ${output.currencyName} (${output.currencySymbol} - ${output.currencyId})`;
+}
+
+const currency = functions.https.onRequest((req, res) => {
   let amount: number = 1;
   let curr1: string = '';
   let curr2: string = '';
+  let country: string = '';
   let currencyPair: string = '';
 
   if (req.body.queryResult.parameters.currency) {
     ({ curr2 } = req.body.queryResult.parameters);
     ({ amount } = req.body.queryResult.parameters.currency);
     curr1 = req.body.queryResult.parameters.currency.currency;
+  } else if (req.body.queryResult.parameters.country) {
+    ({ country } = req.body.queryResult.parameters);
   } else {
     ({ curr1, curr2 } = req.body.queryResult.parameters);
   }
 
-  currencyPair = `${curr1}_${curr2}`;
+  if (req.body.queryResult.parameters.country) {
+    getCountryDatas(country).then((output) => {
+      let result: string = '';
+      if (output === -1) {
+        result = 'No country found';
+      } else {
+        result = buildResponseCountry(output);
+      }
+      res.json({ fulfillmentText: result });
+    }).catch((error) => {
+      res.send(JSON.stringify({ speech: error, displayText: error }));
+    });
+  } else {
+    currencyPair = `${curr1}_${curr2}`;
 
-  getCurrency(currencyPair).then((output) => {
-    const result: string = buildResponse(output, amount, { curr1, curr2 });
-    res.json({ fulfillmentText: result });
-  }).catch((error) => {
-    res.setHeader('Content-Type', 'application/json');
-    res.send(JSON.stringify({ speech: error, displayText: error }));
-  });
+    getCurrency(currencyPair).then((output) => {
+      let result: string = '';
+      if (output === -1) {
+        result = 'No currency found';
+      } else {
+        result = buildResponseCurrencies(output, amount, { curr1, curr2 });
+      }
+      res.json({ fulfillmentText: result });
+    }).catch((error) => {
+      res.send(JSON.stringify({ speech: error, displayText: error }));
+    });
+  }
 });
 
 module.exports = {
   getCurrency,
-  buildResponse,
-  helloWorld,
+  buildResponseCurrencies,
+  buildResponseCountry,
+  currency,
+  getCountryDatas,
 };

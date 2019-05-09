@@ -6,36 +6,98 @@ const admin = require('firebase-admin');
 const test = require('firebase-functions-test')();
 
 describe('Functions', function() {
-  it('Test http function', () => {
-    const req = { body: {queryResult: {parameters: {currency: {amount: 1, currency: 'EUR'}, curr2: 'EUR'}}} };
-    const res = {
-      json: (res) => {
-        assert.equal(res, '1 EUR is 1.00 EUR');
-        done();
-      }
-    };
-    Index.helloWorld(req, res);
-  });
+  describe('Currency', function() {
+    it('Test http function', () => {
+      const req = { body: {queryResult: {parameters: {currency: {amount: 1, currency: 'EUR'}, curr2: 'EUR'}}} };
+      const res = {
+        json: (res) => {
+          assert.equal(res, '1 EUR is 1.00 EUR');
+          done();
+        }
+      };
+      Index.currency(req, res);
+    });
 
-  it('Test http function', () => {
-    const req = { body: {queryResult: {parameters: {curr1: 'EUR', curr2: 'EUR'}}} };
-    const res = {
-      json: (res) => {
-        assert.equal(res, '1 EUR is 1.00 EUR');
-        done();
-      }
-    };
-    Index.helloWorld(req, res);
-  });
+    it('Test http function', () => {
+      const req = { body: {queryResult: {parameters: {curr1: 'EUR', curr2: 'EUR'}}} };
+      const res = {
+        json: (res) => {
+          assert.equal(res, '1 EUR is 1.00 EUR');
+          done();
+        }
+      };
+      Index.currency(req, res);
+    });
 
-  it('Test convert currency', () => {
-    Index.getCurrency('EUR_USD').then((res) => {
-      expect(res).to.be.a('number');
+    it('Test http function with wrong currency', () => {
+      const req = { body: {queryResult: {parameters: {curr1: 'R', curr2: 'EUR'}}} };
+      const res = {
+        json: (res) => {
+          assert.equal(res, '1 EUR is 1.00 EUR');
+          done();
+        }
+      };
+      Index.currency(req, res);
+    });
+
+    it('Test convert currency', () => {
+      Index.getCurrency('EUR_USD').then((res) => {
+        expect(res).to.be.a('number');
+      });
+    });
+
+
+    it('Test convert wrong currency', () => {
+      Index.getCurrency('UR_USD').then((res) => {
+        expect(res).to.be.a('number');
+      });
+    });
+
+    it('Test response sentence', () => {
+      expect(  Index.buildResponseCurrencies(1, 1, {curr1: 'EUR', curr2: 'USR'})).to.be.a('string')
+        .and.equals('1 EUR is 1.00 USR');
     });
   });
 
-  it('Test response sentence', () => {
-    expect(  Index.buildResponse(1, 1, {curr1: 'EUR', curr2: 'USR'})).to.be.a('string')
-      .and.equals('1 EUR is 1.00 USR');
-  });
+  describe('Country', function() {
+    it('Test http function', () => {
+      const req = { body: {queryResult: {parameters: {country: 'france'}}} };
+      const res = {
+        json: (res) => {
+          assert.equal(res, 'The country is: France, use European euro (€ - EUR)');
+          done();
+        }
+      };
+      Index.currency(req, res);
+    });
+
+    it('Test http function wrong entry data', () => {
+      const req = { body: {queryResult: {parameters: {country: 'frnce'}}} };
+      const res = {
+        json: (res) => {
+          assert.equal(res,{ fulfillmentText: 'No country found' });
+          done();
+        }
+      };
+      Index.currency(req, res);
+    });
+
+    it('Test getCountry with wrong name', () => {
+      Index.getCountryDatas('frace').then((res) => {
+        expect(res).equals(-1);
+      });
+    });
+
+
+    it('Test convert currency', () => {
+      Index.getCountryDatas('France').then((res) => {
+        expect(res).to.be.a('object');
+      });
+    });
+
+    it('Test response sentence', () => {
+      expect(  Index.buildResponseCountry({"alpha3":"FRA","currencyId":"EUR","currencyName":"European euro","currencySymbol":"€","id":"FR","name":"France"})).to.be.a('string')
+        .and.equals('France use European euro (€ - EUR)');
+    });
+  })
 });
