@@ -121,7 +121,7 @@ const currency = functions.https.onRequest((req, res) => {
       }
       res.json({ fulfillmentText: result });
     }).catch((error) => {
-      console.log(error);
+      res.send(JSON.stringify({ speech: error, displayText: error }));
     });
   } else {
     currencyPair = `${curr1}_${curr2}`;
@@ -135,7 +135,7 @@ const currency = functions.https.onRequest((req, res) => {
       }
       res.json({ fulfillmentText: result });
     }).catch((error) => {
-      console.log(error);
+      res.send(JSON.stringify({ speech: error, displayText: error }));
     });
   }
 });
