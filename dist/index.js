@@ -51,7 +51,7 @@ function getCurrency(currencyPair) {
 
       res.on('end', () => {
         const response = JSON.parse(body);
-        if (response.results) {
+        if (response.results && response.results[currencyPair]) {
           resolve(response.results[currencyPair].val);
         } else {
           resolve(-1);

@@ -7,7 +7,7 @@
     "build": "npm run lint & babel src/ -d dist/",
     "prepublish": "npm run build",
     "flow": "flow",
-    "test": "nyc mocha",
+    "test": "nyc mocha test/",
     "serve": "firebase serve --only functions",
     "shell": "firebase functions:shell",
     "start": "npm run shell",
