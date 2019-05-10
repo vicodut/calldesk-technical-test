@@ -51,7 +51,7 @@ function getCurrency(currencyPair) {
 
       res.on('end', () => {
         const response = JSON.parse(body);
-        if (response.results[currencyPair]) {
+        if (response.results) {
           resolve(response.results[currencyPair].val);
         } else {
           resolve(-1);
@@ -114,7 +114,7 @@ const currency = functions.https.onRequest((req, res) => {
       }
       res.json({ fulfillmentText: result });
     }).catch(error => {
-      res.send(JSON.stringify({ speech: error, displayText: error }));
+      console.log(error);
     });
   } else {
     currencyPair = `${curr1}_${curr2}`;
@@ -128,7 +128,7 @@ const currency = functions.https.onRequest((req, res) => {
       }
       res.json({ fulfillmentText: result });
     }).catch(error => {
-      res.send(JSON.stringify({ speech: error, displayText: error }));
+      console.log(error);
     });
   }
 });

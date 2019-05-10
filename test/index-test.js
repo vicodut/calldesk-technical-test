@@ -11,8 +11,7 @@ describe('Functions', function() {
       const req = { body: {queryResult: {parameters: {currency: {amount: 1, currency: 'EUR'}, curr2: 'EUR'}}} };
       const res = {
         json: (res) => {
-          assert.equal(res, '1 EUR is 1.00 EUR');
-          done();
+          assert.equal(res.fulfillmentText, '1 EUR is 1.00 EUR');
         }
       };
       Index.currency(req, res);
@@ -22,8 +21,7 @@ describe('Functions', function() {
       const req = { body: {queryResult: {parameters: {curr1: 'EUR', curr2: 'EUR'}}} };
       const res = {
         json: (res) => {
-          assert.equal(res, '1 EUR is 1.00 EUR');
-          done();
+          assert.equal(res.fulfillmentText, '1 EUR is 1.00 EUR');
         }
       };
       Index.currency(req, res);
@@ -33,12 +31,11 @@ describe('Functions', function() {
       const req = { body: {queryResult: {parameters: {curr1: 'R', curr2: 'EUR'}}} };
       const res = {
         json: (res) => {
-          assert.equal(res, '1 EUR is 1.00 EUR');
-          done();
+          assert.equal(res.fulfillmentText, 'No currency found');
         }
       };
       Index.currency(req, res);
-    });
+    }); 
 
     it('Test convert currency', () => {
       Index.getCurrency('EUR_USD').then((res) => {
@@ -61,11 +58,10 @@ describe('Functions', function() {
 
   describe('Country', function() {
     it('Test http function', () => {
-      const req = { body: {queryResult: {parameters: {country: 'france'}}} };
+      const req = { body: {queryResult: {parameters: {country: 'France'}}} };
       const res = {
         json: (res) => {
-          assert.equal(res, 'The country is: France, use European euro (€ - EUR)');
-          done();
+          assert.equal(res.fulfillmentText, 'France use European euro (€ - EUR)');
         }
       };
       Index.currency(req, res);
@@ -75,8 +71,7 @@ describe('Functions', function() {
       const req = { body: {queryResult: {parameters: {country: 'frnce'}}} };
       const res = {
         json: (res) => {
-          assert.equal(res,{ fulfillmentText: 'No country found' });
-          done();
+          assert.equal(res.fulfillmentText, 'No country found');
         }
       };
       Index.currency(req, res);
