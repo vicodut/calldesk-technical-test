@@ -12,6 +12,7 @@ const key = '5a72d29dab3ab35a04c6';
  */
 function getCountryDatas(country) {
   const url = `${host}/countries?apiKey=${key}`;
+  const myReg = new RegExp(`${country}.*`);
   return new Promise((resolve, reject) => {
     http.get(url, res => {
       let body = '';
@@ -22,7 +23,7 @@ function getCountryDatas(country) {
 
       res.on('end', () => {
         const response = Object.values(JSON.parse(body).results);
-        resolve(response.find(el => el.name === country) ? response.find(el => el.name === country) : -1);
+        resolve(response.find(el => el.name.match(myReg) !== null) ? response.find(el => el.name.match(myReg) !== null) : -1);
       });
 
       res.on('error', error => {
