@@ -5,10 +5,10 @@ const host = 'http://free.currconv.com/api/v7';
 const key = '5a72d29dab3ab35a04c6';
 
 /**
- * getCountryDatas - description
+ * getCountryDatas - call currconv api to get country data
  *
- * @param  {type} country: string description
- * @return {type}                 description
+ * @param  {type} country: string country name
+ * @return {type}                 country data from currconv
  */
 function getCountryDatas(country) {
   const url = `${host}/countries?apiKey=${key}`;
@@ -34,11 +34,11 @@ function getCountryDatas(country) {
 }
 
 /**
- * getCurrency - description
+ * getCurrency - call currconv api to get exchange rate
  *
  * @param  {type} currencyPair description
- * @param  {type} amount       description
- * @return {type}              description
+ * @param  {type} amount       amount to convert
+ * @return {type}               exchange rate
  */
 function getCurrency(currencyPair) {
   const url = `${host}/convert?q=${currencyPair}&apiKey=${key}`;
@@ -67,22 +67,22 @@ function getCurrency(currencyPair) {
 }
 
 /**
- * buildResponse - description
+ * buildResponse - build the response for exchange rate
  *
- * @param  {type} output: number  description
- * @param  {type} amount: number  description
- * @param  {type} currencies: any description
- * @return {type}                 description
+ * @param  {type} output: number  exchange rate
+ * @param  {type} amount: number  Amount to convert
+ * @param  {type} currencies: any Currency object {curr1: number, curr2: number}
+ * @return {type}                 String of response
  */
 function buildResponseCurrencies(output, amount, currencies) {
   return `${amount} ${currencies.curr1} is ${(amount * output).toFixed(2)} ${currencies.curr2}`;
 }
 
 /**
- * buildResponseCountry - description
+ * buildResponseCountry - build the response for country currency data
  *
- * @param  {type} output: any description
- * @return {type}             description
+ * @param  {type} output: any country currency data
+ * @return {type}             String of response
  */
 function buildResponseCountry(output) {
   return `${output.name} use ${output.currencyName} (${output.currencySymbol} - ${output.currencyId})`;
@@ -95,6 +95,7 @@ const currency = functions.https.onRequest((req, res) => {
   let country = '';
   let currencyPair = '';
 
+  // Get diffents parameter
   if (req.body.queryResult.parameters.currency) {
     ({ curr2 } = req.body.queryResult.parameters);
     ({ amount } = req.body.queryResult.parameters.currency);
@@ -105,6 +106,7 @@ const currency = functions.https.onRequest((req, res) => {
     ({ curr1, curr2 } = req.body.queryResult.parameters);
   }
 
+  // Call the good service and build & send his response
   if (req.body.queryResult.parameters.country) {
     getCountryDatas(country).then(output => {
       let result = '';
@@ -119,7 +121,6 @@ const currency = functions.https.onRequest((req, res) => {
     });
   } else {
     currencyPair = `${curr1}_${curr2}`;
-
     getCurrency(currencyPair).then(output => {
       let result = '';
       if (output === -1) {
